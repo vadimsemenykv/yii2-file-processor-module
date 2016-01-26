@@ -10,13 +10,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist metalguardian/yii2-file-processor-module "*"
+php composer.phar require --prefer-dist vadymsemeniuk/yii2-file-processor-module "*"
 ```
 
 or add
 
 ```
-"metalguardian/yii2-file-processor-module": "*"
+"vadymsemeniuk/yii2-file-processor-module": "*"
 ```
 
 to the require section of your `composer.json` file.
