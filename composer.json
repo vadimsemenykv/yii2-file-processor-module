@@ -8,6 +8,11 @@
         {
             "name": "Ivan Pushkin",
             "email": "imetalguardi+yii2@gmail.com"
+        },
+        {
+            "name": "Vadym Semeniuk",
+            "email": "vadimsemenykv@gmail.com",
+            "role": "Developer"
         }
     ],
     "require": {
