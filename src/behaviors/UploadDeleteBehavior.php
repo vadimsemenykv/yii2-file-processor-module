@@ -17,7 +17,7 @@ use metalguardian\fileProcessor\helpers\FPM;
  *
  * @property \yii\base\Model $owner
  */
-class UploadBehavior extends Behavior
+class UploadDeleteBehavior extends Behavior
 {
     const VALIDATOR_OFFSET = 100;
 
