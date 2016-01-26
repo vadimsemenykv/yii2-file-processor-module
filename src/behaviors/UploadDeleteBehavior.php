@@ -6,7 +6,6 @@
 
 namespace metalguardian\fileProcessor\behaviors;
 
-use yii\base\Exception;
 use yii\base\Behavior;
 use yii\db\BaseActiveRecord;
 use metalguardian\fileProcessor\helpers\FPM;
@@ -55,7 +54,7 @@ class UploadBehavior extends Behavior
         return [
             \yii\base\Model::EVENT_BEFORE_VALIDATE => 'beforeValidate',
             \yii\base\Model::EVENT_AFTER_VALIDATE => 'afterValidate',
-            yii\db\BaseActiveRecord::EVENT_AFTER_DELETE => 'afterDelete'
+            BaseActiveRecord::EVENT_AFTER_DELETE => 'afterDelete'
         ];
     }
 
@@ -222,8 +221,8 @@ class UploadBehavior extends Behavior
 
     public function afterDelete($event)
     {
-            $id = $this->owner->{$this->attribute};
-            $this->delete($id);
+        $id = $this->owner->{$this->attribute};
+        $this->delete($id);
     }
 
     /**
