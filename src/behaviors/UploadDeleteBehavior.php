@@ -7,6 +7,9 @@
 namespace metalguardian\fileProcessor\behaviors;
 
 use yii\base\Exception;
+use yii\base\Behavior;
+use yii\db\BaseActiveRecord;
+use metalguardian\fileProcessor\helpers\FPM;
 
 /**
  * Class UploadBehavior
@@ -15,7 +18,7 @@ use yii\base\Exception;
  *
  * @property \yii\base\Model $owner
  */
-class UploadBehavior extends \yii\base\Behavior
+class UploadBehavior extends Behavior
 {
     const VALIDATOR_OFFSET = 100;
 

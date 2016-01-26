@@ -5,7 +5,7 @@
  * Time: 12:40
  */
 
-namespace backend\components;
+namespace metalguardian\fileProcessor\behaviors;
 
 use yii\base\Behavior;
 use yii\db\BaseActiveRecord;
@@ -13,8 +13,11 @@ use metalguardian\fileProcessor\helpers\FPM;
 
 class DeleteBehavior extends Behavior
 {
-    /*you can set attribute as array of attributes*/
+    /**
+     * @var string the attribute that will receive the fileId value
+     */
     public $attribute = 'file_id';
+
     /**
      * @inheritdoc
      */
