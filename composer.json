@@ -1,5 +1,5 @@
 {
-    "name": "metalguardian/yii2-file-processor-module",
+    "name": "vadymsemeniuk/yii2-file-processor-module",
     "description": "Extension to upload and store files",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","file","upload"],
