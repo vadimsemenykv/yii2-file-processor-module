@@ -7,6 +7,7 @@
 namespace metalguardian\fileProcessor\components;
 
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class FileTransfer
@@ -71,9 +72,15 @@ class FileTransfer extends \yii\base\Component
     public function saveSystemFile($filePath, $deleteOriginal = false)
     {
         if (is_file($filePath)) {
-            list($dirName, $baseName, $extension, $fileName) = pathinfo($filePath);
+            //list($dirname, $basename, $extension, $filename) = pathinfo($filePath);
+            $file = pathinfo($filePath);
 
-            $id = $this->saveSystemData($baseName, $extension);
+            $dirname = ArrayHelper::getValue($file, 'dirname');
+            $basename = ArrayHelper::getValue($file, 'basename');
+            $extension = ArrayHelper::getValue($file, 'extension');
+            $filename = ArrayHelper::getValue($file, 'filename');
+
+            $id = $this->saveSystemData($filename, $extension);
 
             $directory = \metalguardian\fileProcessor\helpers\FPM::getOriginalDirectory($id);
 
@@ -84,7 +91,7 @@ class FileTransfer extends \yii\base\Component
                 . DIRECTORY_SEPARATOR
                 . \metalguardian\fileProcessor\helpers\FPM::getOriginalFileName(
                     $id,
-                    $baseName,
+                    $filename,
                     $extension
                 );
 
