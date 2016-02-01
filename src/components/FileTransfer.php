@@ -6,6 +6,9 @@
 
 namespace metalguardian\fileProcessor\components;
 
+use yii\base\Exception;
+use yii\helpers\ArrayHelper;
+
 /**
  * Class FileTransfer
  *
@@ -52,6 +55,68 @@ class FileTransfer extends \yii\base\Component
 
         $model = new \metalguardian\fileProcessor\models\File();
         $model->extension = $ext;
+        $model->base_name = $baseName;
+        $model->save(false);
+
+        return $model->id;
+    }
+
+    /**
+     * @param $filePath
+     * @param bool $deleteOriginal
+     *
+     * @return int
+     * @throws \Exception
+     * @throws \yii\base\Exception
+     */
+    public function saveSystemFile($filePath, $deleteOriginal = false)
+    {
+        if (is_file($filePath)) {
+            //list($dirname, $basename, $extension, $filename) = pathinfo($filePath);
+            $file = pathinfo($filePath);
+
+            $dirname = ArrayHelper::getValue($file, 'dirname');
+            $basename = ArrayHelper::getValue($file, 'basename');
+            $extension = ArrayHelper::getValue($file, 'extension');
+            $filename = ArrayHelper::getValue($file, 'filename');
+
+            $id = $this->saveSystemData($filename, $extension);
+
+            $directory = \metalguardian\fileProcessor\helpers\FPM::getOriginalDirectory($id);
+
+            \yii\helpers\FileHelper::createDirectory($directory, 0777, true);
+
+            $newFileName =
+                $directory
+                . DIRECTORY_SEPARATOR
+                . \metalguardian\fileProcessor\helpers\FPM::getOriginalFileName(
+                    $id,
+                    $filename,
+                    $extension
+                );
+
+            if ($deleteOriginal) {
+                rename($filePath, $newFileName);
+            } else {
+                copy($filePath, $newFileName);
+            }
+
+            return $id;
+        } else {
+            throw new \Exception(\metalguardian\fileProcessor\Module::t('exception', 'File path not correct'));
+        }
+    }
+
+    /**
+     * @param $baseName
+     * @param $extension
+     *
+     * @return int
+     */
+    public function saveSystemData($baseName, $extension)
+    {
+        $model = new \metalguardian\fileProcessor\models\File();
+        $model->extension = $extension;
         $model->base_name = $baseName;
         $model->save(false);
 
