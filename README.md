@@ -79,3 +79,11 @@ add this to behaviors of model
                 'required' => false,
                 'image' => true,
    ```
+
+PNG Compression
+------------------
+
+To switch-on compression for png-images install https://pngquant.org.
+Then add to console controller action ```ImageCompressor::compressPngThumbs($path);```,
+where $path is path to thumbnails folder and setup cron task from user which creates files,
+for example www-data(crontab -u www-data -e).
