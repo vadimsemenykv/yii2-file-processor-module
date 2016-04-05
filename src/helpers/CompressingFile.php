@@ -69,7 +69,7 @@ class CompressingFile
     public function isCompressed()
     {
         $filePath = $this->getCompressedFilePath();
-        if(file_exists($filePath)) {
+        if(strpos($this->_name, ImageCompressor::$suffix) || file_exists($filePath)) {
             return true;
         }
         return false;
