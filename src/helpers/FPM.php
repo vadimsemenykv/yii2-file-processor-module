@@ -312,8 +312,16 @@ class FPM
         }
 
         $model = FPM::transfer()->getData($id);
-        $src = static::getThumbnailDirectoryUrl($id, $module, $size)
-            . rawurlencode(static::getThumbnailFileName($id, $model->base_name, $model->extension));
+
+        $thumbnailDirectoryUrl = static::getThumbnailDirectoryUrl($id, $module, $size);
+        $thumbName = static::getThumbnailFileName($id, $model->base_name . ImageCompressor::$suffix, $model->extension);
+        $compressedThumbFile = FPM::getBaseUploadDirectory() . $thumbnailDirectoryUrl . $thumbName;
+        if(!ImageCompressor::isPngExtension($model->extension) || !file_exists($compressedThumbFile))
+        {
+            $thumbName = static::getThumbnailFileName($id, $model->base_name, $model->extension);
+        }
+        $src = $thumbnailDirectoryUrl
+            . rawurlencode($thumbName);
 
         return $src;
     }
