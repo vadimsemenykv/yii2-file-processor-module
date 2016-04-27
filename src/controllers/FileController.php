@@ -42,7 +42,7 @@ class FileController extends \yii\web\Controller
         if (file_exists($fileName)) {
             $data = FPM::transfer()->getData($id);
 
-            if ($baseName !== $data->base_name) {
+            if (strtolower($baseName) !== strtolower($data->base_name)) {
                 throw new NotFoundHttpException(Module::t('exception', 'File not found'));
             }
 
