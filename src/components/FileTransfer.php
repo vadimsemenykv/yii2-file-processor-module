@@ -147,10 +147,10 @@ class FileTransfer extends \yii\base\Component
                 $model->extension
             );
 
-        if (is_file($fileName)) {
-            $result = unlink($fileName) && $this->deleteData($id) ? true : false;
-        } else {
-            $result = false;
+        $result = $this->deleteData($id);
+
+        if ($result && is_file($fileName)) {
+            unlink($fileName);
         }
 
         return $result;
