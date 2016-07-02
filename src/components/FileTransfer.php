@@ -6,6 +6,9 @@
 
 namespace metalguardian\fileProcessor\components;
 
+use yii\base\Exception;
+use yii\helpers\ArrayHelper;
+
 /**
  * Class FileTransfer
  *
@@ -59,6 +62,68 @@ class FileTransfer extends \yii\base\Component
     }
 
     /**
+     * @param $filePath
+     * @param bool $deleteOriginal
+     *
+     * @return int
+     * @throws \Exception
+     * @throws \yii\base\Exception
+     */
+    public function saveSystemFile($filePath, $deleteOriginal = false)
+    {
+        if (is_file($filePath)) {
+            //list($dirname, $basename, $extension, $filename) = pathinfo($filePath);
+            $file = pathinfo($filePath);
+
+            $dirname = ArrayHelper::getValue($file, 'dirname');
+            $basename = ArrayHelper::getValue($file, 'basename');
+            $extension = ArrayHelper::getValue($file, 'extension');
+            $filename = ArrayHelper::getValue($file, 'filename');
+
+            $id = $this->saveSystemData($filename, $extension);
+
+            $directory = \metalguardian\fileProcessor\helpers\FPM::getOriginalDirectory($id);
+
+            \yii\helpers\FileHelper::createDirectory($directory, 0777, true);
+
+            $newFileName =
+                $directory
+                . DIRECTORY_SEPARATOR
+                . \metalguardian\fileProcessor\helpers\FPM::getOriginalFileName(
+                    $id,
+                    $filename,
+                    $extension
+                );
+
+            if ($deleteOriginal) {
+                rename($filePath, $newFileName);
+            } else {
+                copy($filePath, $newFileName);
+            }
+
+            return $id;
+        } else {
+            throw new \Exception(\metalguardian\fileProcessor\Module::t('exception', 'File path not correct'));
+        }
+    }
+
+    /**
+     * @param $baseName
+     * @param $extension
+     *
+     * @return int
+     */
+    public function saveSystemData($baseName, $extension)
+    {
+        $model = new \metalguardian\fileProcessor\models\File();
+        $model->extension = $extension;
+        $model->base_name = $baseName;
+        $model->save(false);
+
+        return $model->id;
+    }
+
+    /**
      * @param $id
      *
      * @return bool
@@ -82,10 +147,10 @@ class FileTransfer extends \yii\base\Component
                 $model->extension
             );
 
-        if (is_file($fileName)) {
-            $result = unlink($fileName) && $this->deleteData($id) ? true : false;
-        } else {
-            $result = false;
+        $result = $this->deleteData($id);
+
+        if ($result && is_file($fileName)) {
+            unlink($fileName);
         }
 
         return $result;
