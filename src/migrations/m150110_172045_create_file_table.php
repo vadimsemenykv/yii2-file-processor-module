@@ -18,10 +18,10 @@ class m150110_172045_create_file_table extends Migration
         $this->createTable(
             \metalguardian\fileProcessor\helpers\FPM::getTableName(),
             [
-                'id' => Schema::TYPE_PK,
-                'extension' => Schema::TYPE_STRING . '(10) NOT NULL COMMENT "File extension"',
-                'base_name' => Schema::TYPE_STRING . '(250) NULL DEFAULT NULL COMMENT "File base name"',
-                'created_at' => Schema::TYPE_INTEGER . ' NOT NULL',
+                'id' => $this->primaryKey(),
+                'extension' => $this->string(10)->notNull()->comment("File extension"),
+                'base_name' => $this->string(250)->defaultValue(null)->comment("File base name"),
+                'created_at' => $this->integer()->notNull(),
             ],
             $tableOptions
         );
