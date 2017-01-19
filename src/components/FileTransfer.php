@@ -6,54 +6,63 @@
 
 namespace metalguardian\fileProcessor\components;
 
+use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
+use yii\helpers\FileHelper;
+use yii\web\UploadedFile;
+use metalguardian\fileProcessor\Module;
+use metalguardian\fileProcessor\helpers\FPM;
+use metalguardian\fileProcessor\models\File;
 
 /**
  * Class FileTransfer
  *
  * @package metalguardian\fileProcessor\components
  */
-class FileTransfer extends \yii\base\Component
+class FileTransfer extends Component
 {
     /**
-     * @param \yii\web\UploadedFile $file
+     * @param UploadedFile $file
      *
-     * @return int
+     * @return int|boolean
      */
-    public function saveUploadedFile(\yii\web\UploadedFile $file)
+    public function saveUploadedFile(UploadedFile $file)
     {
         $id = $this->saveData($file);
+        $directory = FPM::getOriginalDirectory($id);
 
-        $directory = \metalguardian\fileProcessor\helpers\FPM::getOriginalDirectory($id);
-
-        \yii\helpers\FileHelper::createDirectory($directory, 0777, true);
+        FileHelper::createDirectory($directory, 0777, true);
 
         $fileName =
             $directory
             . DIRECTORY_SEPARATOR
-            . \metalguardian\fileProcessor\helpers\FPM::getOriginalFileName(
+            . FPM::getOriginalFileName(
                 $id,
                 $file->getBaseName(),
                 $file->getExtension()
             );
 
-        $file->saveAs($fileName);
+        if ($file->saveAs($fileName)) {
+            return $id;
+        }
 
-        return $id;
+        $this->deleteData($id);
+
+        return false;
     }
 
     /**
-     * @param \yii\web\UploadedFile $file
+     * @param UploadedFile $file
      *
      * @return int
      */
-    public function saveData(\yii\web\UploadedFile $file)
+    public function saveData(UploadedFile $file)
     {
         $ext = $file->getExtension();
         $baseName = $file->getBaseName();
 
-        $model = new \metalguardian\fileProcessor\models\File();
+        $model = new File();
         $model->extension = $ext;
         $model->base_name = $baseName;
         $model->save(false);
@@ -66,8 +75,7 @@ class FileTransfer extends \yii\base\Component
      * @param bool $deleteOriginal
      *
      * @return int
-     * @throws \Exception
-     * @throws \yii\base\Exception
+     * @throws Exception
      */
     public function saveSystemFile($filePath, $deleteOriginal = false)
     {
@@ -82,14 +90,14 @@ class FileTransfer extends \yii\base\Component
 
             $id = $this->saveSystemData($filename, $extension);
 
-            $directory = \metalguardian\fileProcessor\helpers\FPM::getOriginalDirectory($id);
+            $directory = FPM::getOriginalDirectory($id);
 
-            \yii\helpers\FileHelper::createDirectory($directory, 0777, true);
+            FileHelper::createDirectory($directory, 0777, true);
 
             $newFileName =
                 $directory
                 . DIRECTORY_SEPARATOR
-                . \metalguardian\fileProcessor\helpers\FPM::getOriginalFileName(
+                . FPM::getOriginalFileName(
                     $id,
                     $filename,
                     $extension
@@ -103,7 +111,7 @@ class FileTransfer extends \yii\base\Component
 
             return $id;
         } else {
-            throw new \Exception(\metalguardian\fileProcessor\Module::t('exception', 'File path not correct'));
+            throw new Exception(Module::t('exception', 'File path not correct'));
         }
     }
 
@@ -115,7 +123,7 @@ class FileTransfer extends \yii\base\Component
      */
     public function saveSystemData($baseName, $extension)
     {
-        $model = new \metalguardian\fileProcessor\models\File();
+        $model = new File();
         $model->extension = $extension;
         $model->base_name = $baseName;
         $model->save(false);
@@ -127,7 +135,6 @@ class FileTransfer extends \yii\base\Component
      * @param $id
      *
      * @return bool
-     * @throws \Exception
      */
     public function deleteFile($id)
     {
@@ -135,13 +142,13 @@ class FileTransfer extends \yii\base\Component
             return false;
         }
 
-        $directory = \metalguardian\fileProcessor\helpers\FPM::getOriginalDirectory($id);
+        $directory = FPM::getOriginalDirectory($id);
 
         $model = $this->getData($id);
         $fileName =
             $directory
             . DIRECTORY_SEPARATOR
-            . \metalguardian\fileProcessor\helpers\FPM::getOriginalFileName(
+            . FPM::getOriginalFileName(
                 $id,
                 $model->base_name,
                 $model->extension
@@ -161,15 +168,16 @@ class FileTransfer extends \yii\base\Component
      *
      * @param integer $id file id
      *
-     * @return \metalguardian\fileProcessor\models\File|null
-     * @throws \Exception
+     * @return File|null
+     * @throws Exception
      */
     public function getData($id)
     {
-        $model = \metalguardian\fileProcessor\models\File::findOne($id);
+        $model = File::findOne($id);
         if (!$model) {
-            throw new \Exception(\metalguardian\fileProcessor\Module::t('exception', 'Missing meta data for file'));
+            throw new Exception(Module::t('exception', 'Missing meta data for file'));
         }
+
         return $model;
     }
 
@@ -186,6 +194,7 @@ class FileTransfer extends \yii\base\Component
         if ($model) {
             return (boolean)$model->delete();
         }
+
         return false;
     }
 }
