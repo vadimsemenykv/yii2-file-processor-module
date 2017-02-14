@@ -50,11 +50,9 @@ class FileTransfer extends Component
      */
     public function saveData(UploadedFile $file)
     {
-        $baseName = str_replace(' ', '_', strtolower(Inflector::transliterate($file->getBaseName())));
-
         $model = new File();
         $model->extension = $file->getExtension();
-        $model->base_name = $baseName;
+        $model->base_name = Inflector::slug($file->getBaseName(), '_');
         $model->save(false);
 
         return $model;
