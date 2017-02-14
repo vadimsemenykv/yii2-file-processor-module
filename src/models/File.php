@@ -10,6 +10,7 @@ use metalguardian\fileProcessor\Module;
  * @property integer $id
  * @property string $extension
  * @property string $base_name
+ * @property string $alt_tag
  * @property integer $created_at
  */
 class File extends \yii\db\ActiveRecord
@@ -45,7 +46,7 @@ class File extends \yii\db\ActiveRecord
         return [
             [['extension'], 'required'],
             [['extension'], 'string', 'max' => 10],
-            [['base_name'], 'string', 'max' => 250]
+            [['base_name', 'alt_tag'], 'string', 'max' => 250],
         ];
     }
 
@@ -59,6 +60,7 @@ class File extends \yii\db\ActiveRecord
             'extension' => Module::t('model', 'Extension'),
             'base_name' => Module::t('model', 'Base name'),
             'created_at' => Module::t('model', 'Created At'),
+            'alt_tag' => Module::t('model', 'Alt tag')
         ];
     }
 }
