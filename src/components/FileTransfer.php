@@ -1,19 +1,15 @@
 <?php
-/**
- * Author: metal
- * Email: metal
- */
-
 namespace metalguardian\fileProcessor\components;
 
+use metalguardian\fileProcessor\helpers\FPM;
+use metalguardian\fileProcessor\models\File;
+use metalguardian\fileProcessor\Module;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
+use yii\helpers\Inflector;
 use yii\web\UploadedFile;
-use metalguardian\fileProcessor\Module;
-use metalguardian\fileProcessor\helpers\FPM;
-use metalguardian\fileProcessor\models\File;
 
 /**
  * Class FileTransfer
@@ -24,13 +20,13 @@ class FileTransfer extends Component
 {
     /**
      * @param UploadedFile $file
-     *
-     * @return int|boolean
+     * @return int
      */
     public function saveUploadedFile(UploadedFile $file)
     {
-        $id = $this->saveData($file);
-        $directory = FPM::getOriginalDirectory($id);
+        /* @var $data File */
+        $data = $this->saveData($file);
+        $directory = FPM::getOriginalDirectory($data->id);
 
         FileHelper::createDirectory($directory, 0777, true);
 
@@ -38,36 +34,30 @@ class FileTransfer extends Component
             $directory
             . DIRECTORY_SEPARATOR
             . FPM::getOriginalFileName(
-                $id,
-                $file->getBaseName(),
-                $file->getExtension()
+                $data->id,
+                $data->base_name,
+                $data->extension
             );
 
-        if ($file->saveAs($fileName)) {
-            return $id;
-        }
+        $file->saveAs($fileName);
 
-        $this->deleteData($id);
-
-        return false;
+        return $data->id;
     }
 
     /**
      * @param UploadedFile $file
-     *
-     * @return int
+     * @return File
      */
     public function saveData(UploadedFile $file)
     {
-        $ext = $file->getExtension();
-        $baseName = $file->getBaseName();
+        $baseName = str_replace(' ', '_', strtolower(Inflector::transliterate($file->getBaseName())));
 
         $model = new File();
-        $model->extension = $ext;
+        $model->extension = $file->getExtension();
         $model->base_name = $baseName;
         $model->save(false);
 
-        return $model->id;
+        return $model;
     }
 
     /**
