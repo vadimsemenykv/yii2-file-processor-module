@@ -8,7 +8,6 @@ use yii\base\Component;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
-use yii\helpers\Inflector;
 use yii\web\UploadedFile;
 
 /**
@@ -52,7 +51,7 @@ class FileTransfer extends Component
     {
         $model = new File();
         $model->extension = $file->getExtension();
-        $model->base_name = Inflector::slug($file->getBaseName(), '_');
+        $model->base_name = FPM::normalizeFileName($file->getBaseName());
         $model->save(false);
 
         return $model;
