@@ -1,10 +1,7 @@
 <?php
-/**
- * Author: metal
- * Email: metal
- */
-
 namespace metalguardian\fileProcessor\helpers;
+
+use yii\helpers\Inflector;
 
 /**
  * Class FPM
@@ -343,5 +340,20 @@ class FPM
             . rawurlencode(static::getThumbnailFileName($id, $model->base_name, $model->extension));
 
         return $src;
+    }
+    
+    /**
+     * @param $string
+     * @param string $replacement
+     * @param bool $lowercase
+     * @return string
+     */
+    public static function normalizeFileName($string, $replacement = '_', $lowercase = true)
+    {
+        $string = Inflector::transliterate($string);
+        $string = preg_replace('/[^a-zA-Z0-9]+/u', $replacement, $string);
+        $string = trim($string, $replacement);
+
+        return $lowercase ? strtolower($string) : $string;
     }
 }
