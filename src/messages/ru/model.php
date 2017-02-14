@@ -21,4 +21,5 @@ return [
     'Base name' => 'Имя',
     'Extension' => 'Расширение',
     'ID' => 'ID',
+    'Alt tag' => 'Альт тег'
 ];
