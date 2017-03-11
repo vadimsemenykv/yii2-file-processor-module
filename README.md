@@ -87,3 +87,28 @@ To switch-on compression for png-images install https://pngquant.org.
 Then add to console controller action ```ImageCompressor::compressPngThumbs($path);```,
 where $path is path to thumbnails folder and setup cron task from user which creates files,
 for example www-data(crontab -u www-data -e).
+
+
+Adding watermarks to thumbnails
+-------------------
+To add watermark while creating FPM::ACTION_ADAPTIVE_THUMBNAIL, FPM::ACTION_THUMBNAIL or FPM::ACTION_CANVAS_THUMBNAIL config must be like this:
+````
+'sliderThumb' => [
+                        'action' => FPM::ACTION_THUMBNAIL,
+                        'width' => 330,
+                        'height' => 330,
+                        'watermark' => [
+                            'fileName' => $wmarkPath,
+                            'point' => [
+                                'x' => 0,
+                                'y' => 0,
+                            ],
+                            'size' => [
+                                'width' => 330,
+                                'height' => 330,
+                            ]
+                        ],
+                    ],
+````
+where 'point' (coordinates of point on originap image where to place watermark) and 'size' (size of watermark's thumbnail if it larger then original image) are optional, only 'fileName' is required.
+If watermark size is larger then original image - it will not be pasted into original image. To fix this - module will create thumbnail of watermark with original image size to fit it.

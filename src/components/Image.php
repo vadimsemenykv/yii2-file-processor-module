@@ -7,6 +7,7 @@
 namespace metalguardian\fileProcessor\components;
 
 use Imagine\Image\Box;
+use Imagine\Image\BoxInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\ManipulatorInterface;
@@ -212,5 +213,87 @@ class Image
             throw new InvalidParamException("Width and height cannot be null at same time.");
         }
         return [$width, $height];
+    }
+
+
+    /**
+     * @param string $filename
+     * @param string $watermarkFilename
+     * @param array $config
+     * @return ImageInterface
+     */
+    public static function addWatermarkWithSafeConfig($filename, $config = [])
+    {
+        $wpoint = null;
+        $wbox = null;
+        $watermarkFilename = null;
+        if (is_array($config) && isset($config['fileName'])) {
+            $watermarkFilename = $config['fileName'];
+        }
+        if (is_array($config)) {
+            if (isset($config['point']['x']) && isset($config['point']['y'])) {
+                $wpoint = new Point($config['point']['x'], $config['point']['y']);
+            }
+            if (isset($config['size']['width']) && isset($config['size']['height'])) {
+                $wbox = new Box($config['size']['width'], $config['size']['height']);
+            }
+        }
+
+        return static::addWatermark($filename, $watermarkFilename, $wpoint, $wbox);
+    }
+
+    /**
+     * @param string $filename
+     * @param string $watermarkFilename
+     * @param null|Point $wpoint
+     * @param null|Box $wbox
+     * @return ImageInterface
+     */
+    public static function addWatermark($filename, $watermarkFilename, $wpoint = null, $wbox = null)
+    {
+        $image = static::getImagine()->open($filename);
+        $wmarkImage = static::getImagine()->open($watermarkFilename);
+        $size = $image->getSize();
+        $wSize = $wmarkImage->getSize();
+
+        // if point is not set - it will be top left cornet
+        if (is_null($wpoint)) {
+            $wpoint = new Point(0, 0);
+        }
+
+        // if size for watermark thumbnail is set - do this
+        if (!is_null($wbox)) {
+            $wmarkImage = $wmarkImage->thumbnail($wbox, ManipulatorInterface::THUMBNAIL_INSET);
+        }
+
+        // resize watermark if it larger then image in any dimension to fully fit image
+        if (!static::fitToImage($size, $wSize, $wpoint)) {
+            $imageBox = new Box($size->getWidth(), $size->getHeight());
+            $wmarkImage = $wmarkImage->thumbnail($imageBox, ManipulatorInterface::THUMBNAIL_INSET);
+        }
+
+        return $image->paste($wmarkImage, $wpoint);
+    }
+
+    /**
+     * @param BoxInterface $originalSize
+     * @param BoxInterface $insertedSize
+     * @param Point $point
+     * @return bool
+     */
+    protected static function fitToImage(BoxInterface $originalSize, BoxInterface $insertedSize, Point $point)
+    {
+        if ($insertedSize->getWidth() > $originalSize->getWidth() || $insertedSize->getHeight() > $originalSize->getHeight()) {
+            return false;
+        }
+
+        $withOffset = $insertedSize->getWidth() + $point->getX();
+        $heightOffset = $insertedSize->getHeight() + $point->getY();
+
+        if ($withOffset > $originalSize->getHeight() || $heightOffset > $originalSize->getHeight()) {
+            return false;
+        }
+
+        return true;
     }
 }
