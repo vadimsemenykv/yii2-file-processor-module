@@ -1,3 +1,7 @@
+[![Total Downloads](https://poser.pugx.org/vadymsemeniuk/yii2-file-processor-module/d/total.png)](https://packagist.org/packages/vadymsemeniuk/yii2-file-processor-module)
+[![Latest Stable Version](https://poser.pugx.org/vadymsemeniuk/yii2-file-processor-module/v/stable.png)](https://packagist.org/packages/vadymsemeniuk/yii2-file-processor-module)
+[![Dependency Status](https://www.versioneye.com/php/vadymsemeniuk:yii2-file-processor-module/dev-master/badge?style=flat)](https://www.versioneye.com/php/vadymsemeniuk:yii2-file-processor-module)
+
 Yii2 file processor module
 ==========================
 Extension to upload and store files
