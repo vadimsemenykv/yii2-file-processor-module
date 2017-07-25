@@ -119,10 +119,17 @@ class Image
      */
     public static function crop($filename, $width, $height, $startX = 0, $startY = 0)
     {
-        return static::getImagine()
-            ->open($filename)
-            ->copy()
-            ->crop(new Point($startX, $startY), new Box($width, $height));
+        $image =  static::getImagine()->open($filename)->copy();
+        if (substr_count($filename, '.gif')) {
+            $image->layers()->coalesce();
+            foreach ($image->layers() as $frame) {
+                $frame->crop(new Point($startX, $startY), new Box($width, $height));
+            }
+
+            return $image;
+        }
+
+        return $image->crop(new Point($startX, $startY), new Box($width, $height));
     }
     /**
      * Creates a thumbnail image. The function differs from `\Imagine\Image\ImageInterface::thumbnail()` function that
@@ -136,10 +143,12 @@ class Image
     public static function thumbnail($filename, $width, $height, $mode = ManipulatorInterface::THUMBNAIL_OUTBOUND, $filter = ImageInterface::FILTER_UNDEFINED)
     {
         $image = static::getImagine()->open($filename);
+        if (substr_count($filename, '.gif')) {
+            $image->layers()->coalesce();
+        }
 
         $ratio = $image->getSize()->getWidth() / $image->getSize()->getHeight();
         list($width, $height) = static::countNullableSide($ratio, $width, $height);
-
         $box = new Box($width, $height);
 
         return $image->thumbnail($box, $mode, $filter);
