@@ -59,14 +59,22 @@ class FileController extends \yii\web\Controller
                 switch($config['action'])
                 {
                     case FPM::ACTION_ADAPTIVE_THUMBNAIL:
-                        Image::thumbnail($fileName, $config['width'], $config['height'])
-                            ->save($thumbnailFile, $animated)
-                            ->show($extension, $animated);
+                        $img = Image::thumbnail($fileName, $config['width'], $config['height'])
+                            ->save($thumbnailFile, $animated);
+                        if (isset($config['watermark'])) {
+                            $img = Image::addWatermarkWithSafeConfig($thumbnailFile, $config['watermark'])
+                                ->save($thumbnailFile);
+                        }
+                        $img->show($extension, $animated);
                         break;
                     case FPM::ACTION_THUMBNAIL:
-                        Image::thumbnail($fileName, $config['width'], $config['height'], ManipulatorInterface::THUMBNAIL_INSET)
-                            ->save($thumbnailFile, $animated)
-                            ->show($extension, $animated);
+                        $img = Image::thumbnail($fileName, $config['width'], $config['height'], ManipulatorInterface::THUMBNAIL_INSET)
+                            ->save($thumbnailFile, $animated);
+                        if (isset($config['watermark'])) {
+                            $img = Image::addWatermarkWithSafeConfig($thumbnailFile, $config['watermark'])
+                                ->save($thumbnailFile);
+                        }
+                        $img->show($extension, $animated);
                         break;
                     case FPM::ACTION_CROP:
                         Image::crop($fileName, $config['width'], $config['height'], $config['startX'], $config['startY'])
@@ -74,9 +82,13 @@ class FileController extends \yii\web\Controller
                             ->show($extension, $animated);
                         break;
                     case FPM::ACTION_CANVAS_THUMBNAIL:
-                        Image::canvasThumbnail($fileName, $config['width'], $config['height'])
-                            ->save($thumbnailFile)
-                            ->show($extension);
+                        $img = Image::canvasThumbnail($fileName, $config['width'], $config['height'])
+                            ->save($thumbnailFile);
+                        if (isset($config['watermark'])) {
+                            $img = Image::addWatermarkWithSafeConfig($thumbnailFile, $config['watermark'])
+                                ->save($thumbnailFile);
+                        }
+                        $img->show($extension);
                         break;
                     case FPM::ACTION_FRAME:
                         Image::frame($fileName, 50, 'F00')
