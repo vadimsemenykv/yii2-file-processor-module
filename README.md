@@ -115,3 +115,17 @@ To add watermark while creating FPM::ACTION_ADAPTIVE_THUMBNAIL, FPM::ACTION_THUM
 ````
 where 'point' (coordinates of point on originap image where to place watermark) and 'size' (size of watermark's thumbnail if it larger then original image) are optional, only 'fileName' is required.
 If watermark size is larger then original image - it will not be pasted into original image. To fix this - module will create thumbnail of watermark with original image size to fit it.
+
+Change quality of images
+------
+To change quality of thumbnail you need to specify `quality` property
+in config:
+```php
+'thumbImage' => [
+    'action' => FPM::ACTION_THUMBNAIL,
+    'width' => 330,
+    'height' => 330,
+    'quality' => 75,
+],
+```
+This property must be an integer in range from 0 to 100.

@@ -16,6 +16,7 @@ class FPM
     const ACTION_CANVAS_THUMBNAIL = 'canvasThumbnail';
     const ACTION_FRAME = 'frame';
     const ACTION_COPY = 'copy';
+    const ACTION_CHANGE_QUALITY = 'changeQuality';
 
     /**
      * @var \metalguardian\fileProcessor\components\ThumbnailCache
@@ -317,8 +318,10 @@ class FPM
         {
             $thumbName = static::getThumbnailFileName($id, $model->base_name, $model->extension);
         }
+
+        $originalModified = static::getOriginalModifiedTimestamp($id, $model->base_name, $model->extension);
         $src = $thumbnailDirectoryUrl
-            . rawurlencode($thumbName);
+            . rawurlencode($thumbName) . ($originalModified ? ('?' . $originalModified) : '');
 
         return $src;
     }
@@ -336,12 +339,15 @@ class FPM
         }
 
         $model = FPM::transfer()->getData($id);
+
+        $originalModified = static::getOriginalModifiedTimestamp($id, $model->base_name, $model->extension);
         $src = static::getOriginalDirectoryUrl($id)
-            . rawurlencode(static::getThumbnailFileName($id, $model->base_name, $model->extension));
+            . rawurlencode(static::getThumbnailFileName($id, $model->base_name, $model->extension))
+            . ($originalModified ? ('?' . $originalModified) : '');
 
         return $src;
     }
-    
+
     /**
      * @param $string
      * @param string $replacement
@@ -355,5 +361,21 @@ class FPM
         $string = trim($string, $replacement);
 
         return $lowercase ? strtolower($string) : $string;
+    }
+
+    /**
+     * @param $id
+     * @param $baseName
+     * @param $extension
+     * @return bool|int
+     */
+    public static function getOriginalModifiedTimestamp($id, $baseName, $extension)
+    {
+        $fileName = FPM::getOriginalDirectory($id) . DIRECTORY_SEPARATOR . FPM::getOriginalFileName($id, $baseName, $extension);
+        if (file_exists($fileName)) {
+            return filemtime($fileName);
+        }
+
+        return false;
     }
 }

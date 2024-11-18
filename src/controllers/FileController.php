@@ -55,44 +55,44 @@ class FileController extends \yii\web\Controller
             FileHelper::createDirectory(FPM::getThumbnailDirectory($id, $module, $size));
 
             if (isset($config['action'])) {
-                $animated = ['animated' => (bool)substr_count($fileName, '.gif')];
+                $options = $this->_getOptionsFromConfig($config);
                 switch($config['action'])
                 {
                     case FPM::ACTION_ADAPTIVE_THUMBNAIL:
                         $img = Image::thumbnail($fileName, $config['width'], $config['height'])
-                            ->save($thumbnailFile, $animated);
+                            ->save($thumbnailFile, $options);
                         if (isset($config['watermark'])) {
                             $img = Image::addWatermarkWithSafeConfig($thumbnailFile, $config['watermark'])
-                                ->save($thumbnailFile);
+                                ->save($thumbnailFile, $options);
                         }
-                        $img->show($extension, $animated);
+                        $img->show($extension);
                         break;
                     case FPM::ACTION_THUMBNAIL:
                         $img = Image::thumbnail($fileName, $config['width'], $config['height'], ManipulatorInterface::THUMBNAIL_INSET)
-                            ->save($thumbnailFile, $animated);
+                            ->save($thumbnailFile, $options);
                         if (isset($config['watermark'])) {
                             $img = Image::addWatermarkWithSafeConfig($thumbnailFile, $config['watermark'])
-                                ->save($thumbnailFile);
+                                ->save($thumbnailFile, $options);
                         }
-                        $img->show($extension, $animated);
+                        $img->show($extension);
                         break;
                     case FPM::ACTION_CROP:
                         Image::crop($fileName, $config['width'], $config['height'], $config['startX'], $config['startY'])
-                            ->save($thumbnailFile, $animated)
-                            ->show($extension, $animated);
+                            ->save($thumbnailFile, $options)
+                            ->show($extension);
                         break;
                     case FPM::ACTION_CANVAS_THUMBNAIL:
                         $img = Image::canvasThumbnail($fileName, $config['width'], $config['height'])
-                            ->save($thumbnailFile);
+                            ->save($thumbnailFile, $options);
                         if (isset($config['watermark'])) {
                             $img = Image::addWatermarkWithSafeConfig($thumbnailFile, $config['watermark'])
-                                ->save($thumbnailFile);
+                                ->save($thumbnailFile, $options);
                         }
                         $img->show($extension);
                         break;
                     case FPM::ACTION_FRAME:
                         Image::frame($fileName, 50, 'F00')
-                            ->save($thumbnailFile)
+                            ->save($thumbnailFile, $options)
                             ->show($extension);
                         break;
                     case FPM::ACTION_COPY:
@@ -102,6 +102,11 @@ class FileController extends \yii\web\Controller
                             copy($fileName, $thumbnailFile);
                         }
                         \Yii::$app->response->sendFile($thumbnailFile);
+                        break;
+                    case FPM::ACTION_CHANGE_QUALITY:
+                        Image::getImagine()->open($fileName)
+                            ->save($thumbnailFile, $options)
+                            ->show($extension);
                         break;
                     default:
                         throw new InvalidConfigException(Module::t('exception', 'Action is incorrect'));
@@ -113,5 +118,16 @@ class FileController extends \yii\web\Controller
         } else {
             throw new NotFoundHttpException(Module::t('exception', 'File not found'));
         }
+    }
+
+    private function _getOptionsFromConfig(array $config)
+    {
+        $options = [];
+
+        if (isset($config['quality']) && is_int($config['quality']) && $config['quality'] < 100 && $config['quality'] > 0 ) {
+            $options['quality'] = $config['quality'];
+        }
+
+        return $options;
     }
 }
